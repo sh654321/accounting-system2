@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام حسابات كامل مع إدارة العملاء</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .nav-buttons button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .total {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .section {
+            margin-bottom: 30px;
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .section h2 {
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .customer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .customer-actions button {
+            flex: 1;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .popup.active {
+            display: block;
+        }
+        .popup-overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>نظام حسابات كامل مع إدارة العملاء بالجنيه المصري</h1>
+    <div class="container">
+        <!-- أزرار التنقل -->
+        <div class="nav-buttons">
+            <button onclick="showSection('customers')">إدارة العملاء</button>
+            <button onclick="showSection('transactions')">إدارة العمليات المالية</button>
+            <button onclick="showSection('salaries')">إدارة المرتبات</button>
+        </div>
+        <!-- قسم العملاء -->
+        <div class="section active" id="customers">
+            <h2>إدارة العملاء</h2>
+            <div class="form-group">
+                <label for="customerName">اسم العميل:</label>
+                <input type="text" id="customerName" placeholder="أدخل اسم العميل">
+            </div>
+            <div class="form-group">
+                <label for="customerBalance">الرصيد الافتتاحي (جنيه مصري):</label>
+                <input type="number" id="customerBalance" placeholder="أدخل الرصيد الافتتاحي">
+            </div>
+            <button onclick="addCustomer()">إضافة عميل</button>
+            <table id="customersTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم العميل</th>
+                        <th>الرصيد الحالي (جنيه مصري)</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- بيانات العملاء تظهر هنا -->
+                </tbody>
+            </table>
+        </div>
+        <!-- قسم العمليات المالية -->
+        <div class="section" id="transactions">
+            <h2>إدارة العمليات المالية</h2>
+            <div class="form-group">
+                <label for="transactionCustomer">اسم العميل:</label>
+                <select id="transactionCustomer">
+                    <option value="">اختر عميل</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionDescription">الوصف:</label>
+                <input type="text" id="transactionDescription" placeholder="أدخل وصف العملية">
+            </div>
+            <div class="form-group">
+                <label for="transactionType">نوع العملية:</label>
+                <select id="transactionType">
+                    <option value="income">إيراد</option>
+                    <option value="expense">مصروف</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionAmount">المبلغ (جنيه مصري):</label>
+                <input type="number" id="transactionAmount" placeholder="أدخل المبلغ">
+            </div>
+            <button onclick="addTransactionWithCustomer()">إضافة عملية</button>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم العميل</th>
+                        <th>الوصف</th>
+                        <th>النوع</th>
+                        <th>المبلغ (جنيه مصري)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- العمليات تظهر هنا -->
+                </tbody>
+            </table>
+            <div class="total" id="total">الرصيد الكلي: 0 جنيه مصري</div>
+        </div>
+        <!-- قسم المرتبات -->
+        <div class="section" id="salaries">
+            <h2>إدارة المرتبات</h2>
+            <div class="form-group">
+                <label for="employeeName">اسم الموظف:</label>
+                <input type="text" id="employeeName" placeholder="أدخل اسم الموظف">
+            </div>
+            <div class="form-group">
+                <label for="salaryAmount">قيمة المرتب (جنيه مصري):</label>
+                <input type="number" id="salaryAmount" placeholder="أدخل قيمة المرتب">
+            </div>
+            <button onclick="addSalary()">إضافة مرتب</button>
+            <table id="salariesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم الموظف</th>
+                        <th>قيمة المرتب (جنيه مصري)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- بيانات المرتبات تظهر هنا -->
+                </tbody>
+            </table>
+            <div class="total" id="salariesTotal">إجمالي المرتبات: 0 جنيه مصري</div>
+        </div>
+        <!-- نافذة منبثقة لإضافة رصيد -->
+        <div class="popup-overlay" id="addFundsPopupOverlay"></div>
+        <div class="popup" id="addFundsPopup">
+            <h3>إضافة رصيد للعميل</h3>
+            <div class="form-group">
+                <label for="addFundsAmount">المبلغ (جنيه مصري):</label>
+                <input type="number" id="addFundsAmount" placeholder="أدخل المبلغ">
+            </div>
+            <button onclick="confirmAddFunds()">تأكيد</button>
+            <button onclick="closePopup()">إغلاق</button>
+        </div>
+        <!-- نافذة منبثقة لخصم رصيد -->
+        <div class="popup-overlay" id="deductFundsPopupOverlay"></div>
+        <div class="popup" id="deductFundsPopup">
+            <h3>خصم رصيد من العميل</h3>
+            <div class="form-group">
+                <label for="deductFundsAmount">المبلغ (جنيه مصري):</label>
+                <input type="number" id="deductFundsAmount" placeholder="أدخل المبلغ">
+            </div>
+            <button onclick="confirmDeductFunds()">تأكيد</button>
+            <button onclick="closePopup()">إغلاق</button>
+        </div>
+        <!-- نافذة منبثقة لتأكيد حذف العميل -->
+        <div class="popup-overlay" id="deleteCustomerPopupOverlay"></div>
+        <div class="popup" id="deleteCustomerPopup">
+            <h3>تأكيد حذف العميل</h3>
+            <p>هل تريد حذف هذا العميل؟</p>
+            <button onclick="confirmDeleteCustomer()">نعم</button>
+            <button onclick="closePopup()">لا</button>
+        </div>
+    </div>
+
+    <!-- تسجيل خدمة العامل -->
+    <script>
+        // تسجيل خدمة العامل
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => console.log('Service Worker registered'))
+                .catch(error => console.error('Service Worker registration failed:', error));
+        }
+
+        // باقي الأكواد البرمجية الخاصة بالنظام
+        let customers = [];
+        let transactions = [];
+        let salaries = [];
+        let balance = 0;
+        let totalSalaries = 0;
+        let selectedCustomerIdForAction = null;
+
+        // إظهار القسم المحدد وإخفاء الآخرين
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // إضافة عميل جديد
+        function addCustomer() {
+            const customerName = document.getElementById('customerName').value;
+            const customerBalance = parseFloat(document.getElementById('customerBalance').value);
+            if (customerName && !isNaN(customerBalance)) {
+                const customer = {
+                    id: customers.length + 1,
+                    name: customerName,
+                    balance: customerBalance
+                };
+                customers.push(customer);
+                updateCustomersUI();
+                updateCustomerDropdown();
+                clearCustomerForm();
+            } else {
+                alert('يرجى ملء جميع الحقول بشكل صحيح!');
+            }
+        }
+
+        // تحديث واجهة العملاء
+        function updateCustomersUI() {
+            const tbody = document.querySelector('#customersTable tbody');
+            tbody.innerHTML = '';
+            customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${customer.id}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.balance.toFixed(2)} جنيه مصري</td>
+                    <td>
+                        <div class="customer-actions">
+                            <button onclick="openAddFundsPopup(${customer.id})">إضافة رصيد</button>
+                            <button onclick="openDeductFundsPopup(${customer.id})">خصم رصيد</button>
+                            <button onclick="openDeleteCustomerPopup(${customer.id})">حذف</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // مسح نموذج إضافة العميل
+        function clearCustomerForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerBalance').value = '';
+        }
+
+        // تحديث قائمة العملاء في نموذج العمليات المالية
+        function updateCustomerDropdown() {
+            const dropdown = document.getElementById('transactionCustomer');
+            dropdown.innerHTML = '<option value="">اختر عميل</option>';
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // فتح نافذة إضافة رصيد
+        function openAddFundsPopup(customerId) {
+            selectedCustomerIdForAction = customerId;
+            document.getElementById('addFundsPopup').classList.add('active');
+            document.getElementById('addFundsPopupOverlay').classList.add('active');
+        }
+
+        // فتح نافذة خصم رصيد
+        function openDeductFundsPopup(customerId) {
+            selectedCustomerIdForAction = customerId;
+            document.getElementById('deductFundsPopup').classList.add('active');
+            document.getElementById('deductFundsPopupOverlay').classList.add('active');
+        }
+
+        // فتح نافذة حذف العميل
+        function openDeleteCustomerPopup(customerId) {
+            selectedCustomerIdForAction = customerId;
+            document.getElementById('deleteCustomerPopup').classList.add('active');
+            document.getElementById('deleteCustomerPopupOverlay').classList.add('active');
+        }
+
+        // إغلاق النافذة المنبثقة
+        function closePopup() {
+            document.querySelectorAll('.popup').forEach(popup => popup.classList.remove('active'));
+            document.querySelectorAll('.popup-overlay').forEach(overlay => overlay.classList.remove('active'));
+        }
+
+        // تأكيد إضافة الرصيد
+        function confirmAddFunds() {
+            const amount = parseFloat(document.getElementById('addFundsAmount').value);
+            if (!isNaN(amount) && amount > 0) {
+                const customer = customers.find(c => c.id === selectedCustomerIdForAction);
+                if (customer) {
+                    customer.balance += amount;
+                    updateCustomersUI();
+                    closePopup();
+                }
+            } else {
+                alert('يرجى إدخال مبلغ صحيح!');
+            }
+        }
+
+        // تأكيد خصم الرصيد
+        function confirmDeductFunds() {
+            const amount = parseFloat(document.getElementById('deductFundsAmount').value);
+            if (!isNaN(amount) && amount > 0) {
+                const customer = customers.find(c => c.id === selectedCustomerIdForAction);
+                if (customer && customer.balance >= amount) {
+                    customer.balance -= amount;
+                    updateCustomersUI();
+                    closePopup();
+                } else {
+                    alert('الرصيد غير كافٍ أو المبلغ غير صحيح!');
+                }
+            } else {
+                alert('يرجى إدخال مبلغ صحيح!');
+            }
+        }
+
+        // تأكيد حذف العميل
+        function confirmDeleteCustomer() {
+            customers = customers.filter(c => c.id !== selectedCustomerIdForAction);
+            updateCustomersUI();
+            closePopup();
+        }
+    </script>
+</body>
+</html>
